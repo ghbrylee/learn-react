@@ -11,7 +11,7 @@ const Book = ({book}) => {
 
     return (
         <>
-            <Button variant="primary btn-sm w-100" onClick={handleShow}>
+            <Button variant="primary btn-sm" onClick={handleShow}>
                 보기
             </Button>
 

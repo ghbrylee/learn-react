@@ -8,10 +8,11 @@ const LoginPage = ({history}) => {
     const [loading, setLoading] = useState(false);
     const auth=getAuth(app);
     const [form, setForm] = useState({
-        email:'pink@inha.com',
-        password:'12345678'
+        email:'geonhwi@inha.com',
+        password:'123456'
     });
     const {email, password} = form;
+
     const onChange = (e) => {
         setForm({
             ...form,
@@ -22,10 +23,10 @@ const LoginPage = ({history}) => {
         setLoading(true);
         signInWithEmailAndPassword(auth, email, password)
         .then(success=>{
-            sessionStorage.setItem('uid', success.user.uid);
             sessionStorage.setItem('email', email);
+            sessionStorage.setItem('uid', success.user.uid);
             setLoading(false);
-            history.push('/');
+            history.push('/'); // 루트로 이동 
         })
         .catch(error=>{
             alert('에러:' + error.message);

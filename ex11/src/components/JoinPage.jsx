@@ -4,15 +4,16 @@ import {Row, Col, Form, InputGroup, Card, Button} from 'react-bootstrap'
 import { app } from '../firebaseInit';
 import {getAuth, createUserWithEmailAndPassword} from 'firebase/auth'
 import { Link } from 'react-router-dom'
-import { getFirestore, doc, setDoc } from 'firebase/firestore'
+import {getFirestore, doc, setDoc} from 'firebase/firestore'
+
 
 const JoinPage = ({history}) => {
-    const db = getFirestore(app);
     const [loading, setLoading] = useState(false);
     const auth=getAuth(app);
+    const db = getFirestore(app); //app에 이니셜라이즈 정보 담겨있음
     const [form, setForm] = useState({
-        email:'pink@inha.com',
-        password:'12345678'
+        email:'geonhwi@inha.com',
+        password:'123456'
     });
     const {email, password} = form;
     const onChange = (e) => {
@@ -26,8 +27,15 @@ const JoinPage = ({history}) => {
         setLoading(true);
         createUserWithEmailAndPassword(auth, email, password)
         .then(async success=>{
+            //console.log('success....', success)
             const uid = success.user.uid;
-            await setDoc(doc(db, 'user', uid), {email:email, name:'홍길동', photo:'', address:'', phone:''});
+            await setDoc(doc(db, 'user', uid), {
+                email : email,
+                name : '이건휘',
+                address : '경기도 하남시 미사강변중앙로',
+                phone : '010-1234-8471',
+                photo : 'https://play-lh.googleusercontent.com/PvupwmhHTMLh2Cjab4shmRwt1vvEOiULqymc1tv74Zoyb58dVocn9vZ7RM_02vei1yRu'
+            });
             setLoading(false);
             history.push('/login');
         })

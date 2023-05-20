@@ -1,17 +1,11 @@
 import axios from 'axios';
-import React from 'react'
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { Row, Col, Table, Form, Button, InputGroup } from 'react-bootstrap'
+import React, { useEffect, useState } from 'react'
+import { Row, Col, Table, Form, Button } from 'react-bootstrap'
 import MapPage from './MapPage';
-import { app } from '../firebaseInit'
-import { getDatabase, ref, set, get } from 'firebase/database'
 
 const LocalPage = () => {
-    const uid=sessionStorage.getItem('uid');
-    const db = getDatabase(app);
     const [locals, setLocals] = useState([]);
-    const [query, setQuery] = useState('인하대학교');
+    const [query, setQuery] = useState('어모면사무소');
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [is_end, setIs_end] = useState(false);
@@ -19,33 +13,24 @@ const LocalPage = () => {
     const getLocal = async () => {
         const url = "https://dapi.kakao.com/v2/local/search/keyword.json";
         const config = {
-            headers: { "Authorization": "KakaoAK b80880fbde422de3fd9b4a4e67c9bb54" },
+            headers: { "Authorization": "KakaoAK 0643d1622ac8151e0c3c58f6f35889e8" },
             params: { query: query, page: page, size: 5 }
         }
         const result = await axios.get(url, config);
-        //console.log(result);
+        console.log(result);
         setLocals(result.data.documents);
         setTotal(result.data.meta.pageable_count);
         setIs_end(result.data.meta.is_end);
     }
 
-    useEffect(() => { //페이지가 렌더링될때 호출
+    useEffect(() => { //페이지가 렌더링 될 때 호출
         getLocal();
-    }, [page]);
+    }, [page])
 
     const onSearch = (e) => {
-        e.preventDefault();
+        e.preventDefault(); // 바로 서브밋 되는걸 막아주기.
         getLocal();
-    }
-
-    const onFavorite = async(local) =>{
-        const result = await get(ref(db, `/favorite/${uid}/${local.id}`));
-        if(result.val()){
-            alert('이미 즐겨찾기에 추가되었습니다.');
-        }else{
-            await set(ref(db, `/favorite/${uid}/${local.id}`), {...local});
-            alert('즐겨찾기에 추가되었습니다.');
-        }
+        setPage(1);
     }
 
     return (
@@ -53,29 +38,25 @@ const LocalPage = () => {
             <Row>
                 <Col>
                     <h1 className='text-center my-5'>지역검색</h1>
-                    <Row className='my-2'>
-                        <Col md={3} xs={6}>
+                    <Row className='my-5'>
+                        <Col md={5}>
                             <Form onSubmit={onSearch}>
-                                <InputGroup>
-                                    <Form.Control value={query}
-                                        onChange={(e)=>setQuery(e.target.value)}
-                                        placeholder='검색어' />
-                                    <Button>검색</Button>    
-                                </InputGroup>        
+                                <Form.Control
+                                    value={query} placeholder='검색어' onChange={(e) => setQuery(e.target.value)}
+                                />
                             </Form>
                         </Col>
                         <Col>
-                            검색수: {total}건
+                            검색수 : {total} 건
                         </Col>
                     </Row>
                     <Table striped bordered hover>
                         <thead>
                             <tr className='text-center'>
                                 <td>장소명</td>
-                                <td>주소</td>
                                 <td>전화</td>
+                                <td>주소</td>
                                 <td>위치</td>
-                                <td>즐겨찾기</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -85,20 +66,14 @@ const LocalPage = () => {
                                     <td>{local.phone}</td>
                                     <td>{local.address_name}</td>
                                     <td><MapPage local={local}/></td>
-                                    <td><Button onClick={()=>onFavorite(local)}
-                                        className="btn-sm">즐겨찾기</Button></td>
                                 </tr>
                             )}
                         </tbody>
                     </Table>
-                    <div className='text-center my-2'>
-                        <Button
-                            disabled={page==1} 
-                            onClick={()=>setPage(page-1)}>이전</Button>
-                        <span className="mx-3">{page}</span>
-                        <Button 
-                            disabled={is_end}
-                            onClick={()=>setPage(page+1)}>다음</Button>
+                    <div className='text-center'>
+                        <Button disabled = {page ==1} onClick={()=>setPage(page-1)}>이전</Button>
+                        <span className='mx-3'>{page}</span>
+                        <Button disabled = {is_end} onClick={()=>setPage(page+1)}>다음</Button>
                     </div>
                 </Col>
             </Row>

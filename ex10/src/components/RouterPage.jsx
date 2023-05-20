@@ -1,10 +1,7 @@
 import React from 'react'
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import { Link, Route, Switch, withRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 import BookPage from './BookPage';
@@ -14,9 +11,9 @@ import JoinPage from './JoinPage';
 import MyPage from './MyPage';
 
 const RouterPage = ({history}) => {
-    const onLogout = () => {
+    const onClickLogout = () => {
         sessionStorage.removeItem('email');
-        history.push('/');
+        history.push('/')
     }
     return (
         <>
@@ -33,15 +30,14 @@ const RouterPage = ({history}) => {
                             <Link to="/book">도서검색</Link>
                             <Link to="/local">지역검색</Link>
                         </Nav>
-                        <div>
+                        <div className='d-flex'>
                             {sessionStorage.getItem('email') ?
                                 <>
-                                    <Link to="/mypage">
+                                    <Link to="/mypage" className='me-2 pt-1'>
                                         {sessionStorage.getItem('email')}
                                     </Link>
-                                    <Link
-                                        onClick={onLogout} 
-                                        to="/logout">로그아웃</Link>
+                                    <Link to="/logout"
+                                        onClick={onClickLogout}>로그아웃</Link>
                                 </>
                                 :
                                 <Link to="/login">로그인</Link>

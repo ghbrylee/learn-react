@@ -1,26 +1,24 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import {Col, Row, Card, Form, InputGroup, Button} from 'react-bootstrap'
-import { app } from '../firebaseInit'
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore'
-import { getStorage, uploadBytes, ref, getDownloadURL } from 'firebase/storage'
-import ModalPostcode from './ModalPostcode'
+import {app} from '../firebaseInit'
+import {getFirestore, doc, getDoc, setDoc} from 'firebase/firestore'
+import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage'
 
-const MyPage = ({history}) => {
-    const uid = sessionStorage.getItem('uid');
+const MyPage = (history) => {
+    const [loading, setLoading] = useState(false);
+    const uid = sessionStorage.getItem("uid")
     const db = getFirestore(app);
     const storage = getStorage(app);
-    const [loading, setLoading] = useState(false);
-    const [fileName, setFileName] = useState('');
-    const [file, setFile] = useState(null);
+    const [image, setImage] = useState('https://via.placeholder.com/200x200')
+    const [file, setFile] = useState(null)
     const [form, setForm] = useState({
-        email: sessionStorage.getItem('email'),
         name:'무기명',
         phone: '010-1010-1010',
         address: '인천 서구 경서동',
-        photo:'',
+        photo:''
     });
-    const {name, phone, address, photo } = form;
+    const {name, phone, address, photo} = form;
     const onChange = (e) => {
         setForm({
             ...form,
@@ -28,32 +26,30 @@ const MyPage = ({history}) => {
         })
     }
     const onChangeFile = (e) => {
+        setImage(URL.createObjectURL(e.target.files[0]));
         setFile(e.target.files[0]);
-        setFileName(URL.createObjectURL(e.target.files[0]));
+      }
+
+    const getUser = async() =>{
+        setLoading(true)
+        const user = await getDoc(doc(db, 'user', uid));
+        //console.log(user.data());
+        setForm(user.data());
+        setImage(user.data().photo ? user.data().photo:'https://via.placeholder.com/200x200')
+        setLoading(false);
     }
 
-    const getUser = async() => {
-        const result = await getDoc(doc(db, 'user', uid));
-        setForm(result.data());
-        setFileName(result.data().photo ? result.data().photo: 'https://via.placeholder.com/200x200');
-    }
-
-    const onPostcode = (address)=> {
-        setForm({
-            ...form,
-            address:address
-        });
-    }
-
-    const onSave = async() => {
-        if(!window.confirm('변경내용을 수정하실래요?')) return;
+    const onUpdate = async() =>{
+        if(!window.confirm('수정된 내용 저장?')) return;
         setLoading(true);
+        //파일 업로드(파이어베이스에 스토리지)
         if(file){
-            const snapshot = await uploadBytes(ref(storage, `/photo/${Date.now()}.jpg`), file);
+            const snapshot = await uploadBytes(ref(storage,`/photo/${Date.now()}.jpg`), file);
             const url = await getDownloadURL(snapshot.ref);
-            await setDoc(doc(db, 'user', uid), { ...form, photo:url });
-        }else{
-            await setDoc(doc(db, 'user', uid), { ...form });
+            await setDoc(doc(db, 'user', uid), {...form, photo:url});
+        }
+        else{
+            await setDoc(doc(db, 'user', uid), form);
         }
         setLoading(false);
         history.push('/');
@@ -61,9 +57,10 @@ const MyPage = ({history}) => {
 
     useEffect(()=>{
         getUser();
-    }, []);
+    },[]);
 
-    if(loading) return <h1 className='text-center my-5'>로딩중......</h1>
+
+    if(loading) return <h1 className='test-center'>로딩중</h1>
     return (
         <Row className='my-5'>
             <Col>
@@ -92,17 +89,15 @@ const MyPage = ({history}) => {
                             <Form.Control 
                                 onChange={onChange} name="address"
                                 value={address}/>
-                            <ModalPostcode onPostcode={onPostcode}/>    
                         </InputGroup>
                         <div className='my-2'>
-                            <img src={fileName} width="25%" className='my-2'/>
+                            <img src={image} width="25%" className='my-2'/>
                             <Form.Control 
                                 onChange={onChangeFile}
                                 type="file"/>
                         </div>
                         <div className='text-center my-2'>
-                            <Button onClick={onSave}
-                                className='px-5'>정보수정</Button>
+                            <Button className='px-5' onClick={onUpdate}>정보수정</Button>
                         </div>    
                     </Form>
                 </Card>

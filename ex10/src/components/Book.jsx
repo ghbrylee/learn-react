@@ -1,32 +1,38 @@
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import {Map, MapMarker} from 'react-kakao-maps-sdk'
+import {Card} from 'react-bootstrap'
 
-const MapPage = ({local}) => {
+const Book = ({book}) => {
     const [show, setShow] = useState(false);
+
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     return (
         <>
-            <Button variant="primary" className='btn-sm'
-                 onClick={handleShow}>위치보기</Button>
+            <Button variant="primary btn-sm" onClick={handleShow} className='w-100 btn-sm'>
+                보기
+            </Button>
+
             <Modal
                 show={show}
                 onHide={handleClose}
                 backdrop="static"
                 keyboard={false}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{local.place_name}</Modal.Title>
+                    <Modal.Title>{book.title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Map center={{ lat: local.y, lng: local.x }} 
-                        style={{ width: "100%", height: "360px" }}>
-                        <MapMarker position={{ lat: local.y, lng: local.x }}>
-                            <div style={{ color: "#000" }}>{local.address_name}</div>
-                        </MapMarker>
-                    </Map>
+                    <Card>
+                        <Card.Body className="book">
+                            <img src={book.thumbnail}/>
+                            <div>가격: {book.price}</div>
+                            <div>저자: {book.authors}</div>
+                            <hr/>
+                            <div>{book.contents}</div>
+                        </Card.Body>
+                    </Card>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
@@ -38,4 +44,4 @@ const MapPage = ({local}) => {
     )
 }
 
-export default MapPage
+export default Book
